@@ -9,6 +9,8 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController _messageController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+  bool _isInputFocused = false;
   final List<Map<String, dynamic>> _messages = [
     {
       'text': 'Bagaimana cara mengurus KTP yang hilang?',
@@ -54,6 +56,25 @@ class _ChatPageState extends State<ChatPage> {
       'color': Colors.red,
     },
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // Listen to focus changes
+    _focusNode.addListener(() {
+      setState(() {
+        _isInputFocused = _focusNode.hasFocus;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -348,6 +369,7 @@ class _ChatPageState extends State<ChatPage> {
             child: SafeArea(
               child: Row(
                 children: [
+                  // Input container with flexible width
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
@@ -363,6 +385,7 @@ class _ChatPageState extends State<ChatPage> {
                           Expanded(
                             child: TextField(
                               controller: _messageController,
+                              focusNode: _focusNode,
                               decoration: const InputDecoration(
                                 hintText: 'Ketik pesan Anda...',
                                 hintStyle: TextStyle(
@@ -395,29 +418,42 @@ class _ChatPageState extends State<ChatPage> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  GestureDetector(
-                    onTap: () {
-                      // Handle send message
-                      if (_messageController.text.trim().isNotEmpty) {
-                        setState(() {
-                          _messages.add({
-                            'text': _messageController.text.trim(),
-                            'isBot': false,
-                            'time': '14:35'
-                          });
-                        });
-                        _messageController.clear();
-                      }
-                    },
-                    child: CircleAvatar(
-                      radius: 24,
-                      backgroundColor: Colors.blue.shade600,
-                      child: const Icon(
-                        Icons.send,
-                        color: Colors.white,
-                        size: 20,
-                      ),
+                  // Animated send button with size animation
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeInOut,
+                    width: _isInputFocused ? 64 : 0, // Width animation instead of slide
+                    margin: EdgeInsets.only(left: _isInputFocused ? 8 : 0),
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 200),
+                      opacity: _isInputFocused ? 1.0 : 0.0,
+                      child: _isInputFocused
+                          ? GestureDetector(
+                              onTap: () {
+                                // Handle send message
+                                if (_messageController.text.trim().isNotEmpty) {
+                                  setState(() {
+                                    _messages.add({
+                                      'text': _messageController.text.trim(),
+                                      'isBot': false,
+                                      'time': '14:35'
+                                    });
+                                  });
+                                  _messageController.clear();
+                                  _focusNode.unfocus(); // Unfocus after sending
+                                }
+                              },
+                              child: CircleAvatar(
+                                radius: 24,
+                                backgroundColor: Colors.blue.shade600,
+                                child: const Icon(
+                                  Icons.send,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ),
+                            )
+                          : const SizedBox.shrink(),
                     ),
                   ),
                 ],
@@ -427,11 +463,5 @@ class _ChatPageState extends State<ChatPage> {
         ],
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _messageController.dispose();
-    super.dispose();
   }
 }
