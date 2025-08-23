@@ -353,6 +353,10 @@ class _ChatPageState extends State<ChatPage> {
                       decoration: BoxDecoration(
                         color: Colors.grey.shade100,
                         borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: Colors.grey.shade200,
+                          width: 1,
+                        ),
                       ),
                       child: Row(
                         children: [
@@ -366,6 +370,9 @@ class _ChatPageState extends State<ChatPage> {
                                   fontSize: 14,
                                 ),
                                 border: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                filled: false,
                                 contentPadding: EdgeInsets.symmetric(
                                   horizontal: 16,
                                   vertical: 12,
@@ -373,12 +380,16 @@ class _ChatPageState extends State<ChatPage> {
                               ),
                             ),
                           ),
-                          IconButton(
-                            icon: Icon(
-                              Icons.attach_file,
-                              color: Colors.grey.shade600,
+                          GestureDetector(
+                            onTap: () {},
+                            child: Container(
+                              padding: const EdgeInsets.all(12),
+                              child: Icon(
+                                Icons.attach_file,
+                                color: Colors.grey.shade600,
+                                size: 20,
+                              ),
                             ),
-                            onPressed: () {},
                           ),
                         ],
                       ),
