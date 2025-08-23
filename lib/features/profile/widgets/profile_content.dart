@@ -40,6 +40,62 @@ class _ProfileContentState extends State<ProfileContent> {
     }
   }
 
+  Future<void> _showLogoutConfirmation() async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            Icon(
+              Icons.warning_amber,
+              color: Colors.orange[600],
+              size: 24,
+            ),
+            const SizedBox(width: 8),
+            const Text('Konfirmasi Keluar'),
+          ],
+        ),
+        content: const Text(
+          'Apakah Anda yakin ingin keluar dari akun?',
+          style: TextStyle(fontSize: 16),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(
+              'Batal',
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red[600],
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              'Keluar',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      _handleLogout();
+    }
+  }
+
   Future<void> _handleLogout() async {
     try {
       await AuthService.instance.signOut();
@@ -116,7 +172,7 @@ class _ProfileContentState extends State<ProfileContent> {
               ),
             ),
             // Logout Button
-            LogoutButton(onPressed: _handleLogout),
+            LogoutButton(onPressed: _showLogoutConfirmation),
           ],
         ),
       ),

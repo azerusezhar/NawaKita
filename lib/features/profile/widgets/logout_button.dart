@@ -27,12 +27,23 @@ class LogoutButton extends StatelessWidget {
             side: BorderSide(color: Colors.red[200]!),
           ),
         ),
-        child: Text(
-          'Keluar',
-          style: textTheme.bodyLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: Colors.red[600],
-          ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.logout,
+              size: 18,
+              color: Colors.red[600],
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Keluar',
+              style: textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: Colors.red[600],
+              ),
+            ),
+          ],
         ),
       ),
     );

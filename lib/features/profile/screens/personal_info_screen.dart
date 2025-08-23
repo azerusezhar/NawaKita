@@ -10,7 +10,8 @@ class PersonalInfoScreen extends StatefulWidget {
   State<PersonalInfoScreen> createState() => _PersonalInfoScreenState();
 }
 
-class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
+class _PersonalInfoScreenState extends State<PersonalInfoScreen>
+    with TickerProviderStateMixin {
   String? _fullName;
   String? _email;
   String? _username;
@@ -19,11 +20,39 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   String? _city;
   String? _postalCode;
   bool _loading = true;
+  bool _isScrolled = false;
+  late AnimationController _animationController;
+  late Animation<Color?> _backgroundAnimation;
+  late Animation<double> _elevationAnimation;
 
   @override
   void initState() {
     super.initState();
     _loadProfile();
+    
+    // Initialize animation controller
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    
+    // Background color animation
+    _backgroundAnimation = ColorTween(
+      begin: Colors.transparent,
+      end: Colors.white,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    ));
+    
+    // Elevation animation
+    _elevationAnimation = Tween<double>(
+      begin: 0.0,
+      end: 4.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    ));
   }
 
   Future<void> _loadProfile() async {
@@ -138,27 +167,54 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black87),
-        ),
-        title: Text(
-          'Informasi Pribadi',
-          style: textTheme.titleLarge?.copyWith(
-            color: const Color(0xFF6B73FF),
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        centerTitle: true,
-      ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              child: Column(
-                children: [
+          : NotificationListener<ScrollNotification>(
+              onNotification: (scrollInfo) {
+                final isScrolled = scrollInfo.metrics.pixels > 0;
+                if (isScrolled != _isScrolled) {
+                  setState(() {
+                    _isScrolled = isScrolled;
+                  });
+                  
+                  // Animate based on scroll state
+                  if (isScrolled) {
+                    _animationController.forward();
+                  } else {
+                    _animationController.reverse();
+                  }
+                }
+                return false;
+              },
+              child: CustomScrollView(
+                slivers: [
+                  AnimatedBuilder(
+                    animation: _animationController,
+                    builder: (context, child) {
+                      return SliverAppBar(
+                        backgroundColor: _backgroundAnimation.value,
+                        surfaceTintColor: Colors.white,
+                        elevation: _elevationAnimation.value,
+                        shadowColor: Colors.black.withOpacity(0.1),
+                        pinned: true,
+                        leading: IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.arrow_back_ios, color: Colors.black87),
+                        ),
+                        title: Text(
+                          'Informasi Pribadi',
+                          style: textTheme.titleLarge?.copyWith(
+                            color: const Color(0xFF6B73FF),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        centerTitle: true,
+                      );
+                    },
+                  ),
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: [
                   const SizedBox(height: 20),
                   
                   // Profile Photo Section
@@ -307,9 +363,18 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                   ),
                   
                   const SizedBox(height: 100),
-                ],
-              ),
+                    ],
+                  ),
+                ),
+              ],
             ),
+          ),
     );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 }
