@@ -3,6 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import '../../../app/data/destinations_service.dart';
 import '../../home/widgets/place_card.dart';
 import '../services/favorites_service.dart';
+import '../../explore/screens/destination_detail_screen.dart';
 
 class FavoritesContent extends StatefulWidget {
   const FavoritesContent({super.key});
@@ -523,6 +524,15 @@ class _FavoritesContentState extends State<FavoritesContent> {
                 distanceLabel: '${(index + 1) * 2} km',
                 rating: rating,
                 imageUrl: destination['image_url'] ?? 'https://picsum.photos/seed/fav$index/600/400',
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => DestinationDetailScreen(
+                        destination: destination,
+                      ),
+                    ),
+                  );
+                },
               ),
               Positioned(
                 top: 8,

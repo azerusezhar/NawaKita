@@ -387,7 +387,7 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen>
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                 decoration: BoxDecoration(
-                                  color: Colors.grey[100],
+                                  color: const Color(0xFFE3F2FD), // Light blue highlight
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Row(
@@ -397,22 +397,19 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen>
                                       width: 20,
                                       height: 20,
                                       decoration: const BoxDecoration(
-                                        color: Colors.blue,
                                         shape: BoxShape.circle,
                                       ),
-                                      child: const Center(
-                                        child: Text(
-                                          'G',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                      child: ClipOval(
+                                        child: Image.asset(
+                                          'assets/images/logo-google.png',
+                                          width: 20,
+                                          height: 20,
+                                          fit: BoxFit.cover,
                                         ),
                                       ),
                                     ),
                                     const SizedBox(width: 8),
-                                    const Icon(Icons.star, color: Colors.orange, size: 16),
+                                    const Icon(Icons.star, color: Color(0xFF1976D2), size: 16),
                                     const SizedBox(width: 4),
                                     Text(
                                       rating.toStringAsFixed(1),
@@ -439,13 +436,13 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen>
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                 decoration: BoxDecoration(
-                                  color: Colors.grey[100],
+                                  color: const Color(0xFFFFF8E1), // Light yellow/amber highlight
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Icon(Icons.star, color: Colors.orange, size: 16),
+                                    const Icon(Icons.star, color: Color(0xFFF57C00), size: 16),
                                     const SizedBox(width: 4),
                                     Text(
                                       rating.toStringAsFixed(1),
@@ -472,13 +469,13 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen>
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                 decoration: BoxDecoration(
-                                  color: Colors.grey[100],
+                                  color: const Color(0xFFE8F5E8), // Light green highlight
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Icon(Icons.directions_walk, color: Colors.green, size: 16),
+                                    const Icon(Icons.directions_walk, color: Color(0xFF4CAF50), size: 16),
                                     const SizedBox(width: 4),
                                     Text(
                                       _distanceText,

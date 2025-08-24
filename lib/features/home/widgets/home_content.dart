@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../../app/data/destinations_service.dart';
 import '../../explore/screens/destinations_explore_screen.dart';
+import '../../explore/screens/destination_detail_screen.dart';
 import 'place_card.dart';
 
 class HomeContent extends StatefulWidget {
@@ -277,6 +278,15 @@ class _HomeContentState extends State<HomeContent> {
                                 distanceLabel: distanceText,
                                 rating: rating,
                                 imageUrl: destination['image_url'] ?? 'https://picsum.photos/600/400',
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => DestinationDetailScreen(
+                                        destination: destination,
+                                      ),
+                                    ),
+                                  );
+                                },
                               );
                             },
                           ),
@@ -352,6 +362,26 @@ class _HomeContentState extends State<HomeContent> {
                       distanceLabel: '${(index + 2) * 2} km',
                       rating: rec['rating'] as double,
                       imageUrl: rec['image'] as String,
+                      onTap: () {
+                        // Create destination data for static recommendations
+                        final destination = {
+                          'id': 'rec_$index',
+                          'name': rec['title'],
+                          'address': rec['subtitle'],
+                          'rating': rec['rating'],
+                          'image_url': rec['image'],
+                          'description': 'Tempat wisata yang menarik dan populer di kawasan ini. Menawarkan pengalaman yang tak terlupakan bagi pengunjung dengan berbagai fasilitas dan atraksi menarik.',
+                          'latitude': -7.9666 + (index * 0.01),
+                          'longitude': 112.6326 + (index * 0.01),
+                        };
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => DestinationDetailScreen(
+                              destination: destination,
+                            ),
+                          ),
+                        );
+                      },
                     );
                   },
                 ),

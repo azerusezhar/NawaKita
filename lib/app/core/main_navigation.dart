@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../features/home/widgets/home_content.dart';
 import '../../features/profile/widgets/profile_content.dart';
 import '../../features/chatbot/screens/chatbot_screen.dart';
+import '../../features/explore/screens/destinations_explore_screen.dart';
+import '../../features/favorite/screens/favorites_screen.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -15,8 +17,8 @@ class _MainNavigationState extends State<MainNavigation> {
 
   final List<Widget> _screens = [
     const HomeContent(), // Home
-    const Center(child: Text('Eksplorasi')), // Eksplorasi placeholder
-    const Center(child: Text('Favorit')), // Favorit placeholder
+    const DestinationsExploreScreen(), // Eksplorasi
+    const FavoritesScreen(), // Favorit
     const ProfileContent(), // Profile
   ];
 
