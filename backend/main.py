@@ -6,7 +6,8 @@ import os
 import logging
 
 import vertexai
-from vertexai.generative_models import GenerativeModel, GenerationConfig, Part
+# ✅ Impor `Content` yang dibutuhkan
+from vertexai.generative_models import GenerativeModel, GenerationConfig, Part, Content
 
 app = FastAPI(title="Malang Chat Backend", version="0.1.0")
 
@@ -22,7 +23,7 @@ app.add_middleware(
 # Config via env
 PROJECT_ID = os.environ.get("PROJECT_ID")
 LOCATION = os.environ.get("LOCATION", "asia-southeast2")
-MODEL_NAME = os.environ.get("MODEL_NAME", "gemini-1.5-flash")
+MODEL_NAME = os.environ.get("MODEL_NAME", "gemini-1.5-flash-001") # Using specific version is better
 TEMPERATURE = float(os.environ.get("TEMPERATURE", "0.6"))
 MAX_TOKENS = int(os.environ.get("MAX_TOKENS", "512"))
 TOP_P = float(os.environ.get("TOP_P", "0.9"))
@@ -47,6 +48,7 @@ def _model():
 
 
 class ChatMessage(BaseModel):
+    # 'assistant' is a common name from client-side, maps to 'model' for Gemini
     role: Literal["user", "assistant", "system"]
     content: str
 
@@ -61,9 +63,10 @@ class ChatResponse(BaseModel):
 
 
 SYSTEM_PROMPT = (
-    "Anda asisten untuk Kota Malang. Jawab singkat, akurat, dan kontekstual. "
-    "Prioritaskan informasi lokal Malang (destinasi, kuliner, transportasi, layanan publik). "
-    "Jika tidak yakin, katakan tidak tahu."
+    "Anda adalah asisten virtual yang berpengetahuan luas tentang Kota Malang, Indonesia. "
+    "Jawab pertanyaan dengan singkat, akurat, dan relevan dengan konteks Malang. "
+    "Prioritaskan informasi tentang destinasi wisata, kuliner khas, rute transportasi, dan layanan publik di Malang. "
+    "Jika pertanyaan di luar konteks Malang atau Anda tidak yakin dengan jawabannya, katakan saja Anda tidak tahu."
 )
 
 
@@ -74,12 +77,25 @@ def health():
 
 @app.post("/chat", response_model=ChatResponse)
 def chat(req: ChatRequest):
-    # Build contents: system + history + city focus
-    contents = []
-    contents.append({"role": "user", "parts": [Part.from_text(SYSTEM_PROMPT)]})
+    # ✅ 1. Gabungkan system prompt dan fokus kota menjadi satu instruksi awal
+    full_system_prompt = f"{SYSTEM_PROMPT}\n\nFokus percakapan ini hanya untuk kota: {req.city}."
+    
+    # ✅ 2. Gunakan objek `Content` dan `Part`, bukan dictionary.
+    #    Ini adalah perbaikan utama untuk error TypeError Anda.
+    #    Pola [user_prompt, model_response] baik untuk memulai percakapan.
+    contents = [
+        Content(role="user", parts=[Part.from_text(full_system_prompt)]),
+        Content(role="model", parts=[Part.from_text("Baik, saya mengerti. Saya siap membantu dengan informasi seputar Kota Malang.")])
+    ]
+
     for m in req.messages:
-        contents.append({"role": m.role, "parts": [Part.from_text(m.content)]})
-    contents.append({"role": "user", "parts": [Part.from_text(f"Fokus hanya kota: {req.city}.")]})
+        # ✅ 3. Petakan peran 'assistant' dari request menjadi 'model' untuk API Gemini
+        #    Peran 'system' diabaikan karena sudah ditangani di prompt awal
+        if m.role == "system":
+            continue
+        role = "model" if m.role == "assistant" else "user"
+        contents.append(Content(role=role, parts=[Part.from_text(m.content)]))
+    
     try:
         resp = _model().generate_content(
             contents,
@@ -90,14 +106,14 @@ def chat(req: ChatRequest):
                 top_k=TOP_K,
             ),
         )
+        # Use .text for safety, it handles cases where generation is blocked
         text = resp.text or ""
         return ChatResponse(answer=text)
     except Exception as e:
         logging.exception("Generation failed: %s", e)
-        # Return friendly message with 200 to avoid client-side 500 UX
         return ChatResponse(
             answer=(
-                "Maaf, layanan sedang bermasalah. Coba lagi beberapa saat.\n"
-                "Detail teknis: " + str(e)
+                "Maaf, layanan sedang mengalami gangguan. Silakan coba lagi nanti.\n"
+                f"(Detail teknis: {e})"
             )
         )
