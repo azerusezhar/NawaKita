@@ -151,6 +151,7 @@ class PlaceCard extends StatelessWidget {
                         style: TextStyle(color: cs.onSurfaceVariant, fontSize: 13.0),
                       ),
                       const Spacer(),
+                      // Bottom meta row (category only) — distance hidden per request
                       Row(
                         children: [
                           Flexible(
@@ -168,24 +169,7 @@ class PlaceCard extends StatelessWidget {
                               ),
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          Flexible(
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.place_rounded, size: 15, color: cs.onSurfaceVariant),
-                                const SizedBox(width: 2),
-                                Flexible(
-                                  child: Text(
-                                    distanceLabel,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(color: cs.onSurfaceVariant, fontWeight: FontWeight.w600, fontSize: 12.5),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                          // Distance element removed
                         ],
                       ),
                     ],

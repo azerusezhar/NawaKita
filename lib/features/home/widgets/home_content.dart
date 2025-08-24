@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import '../../../app/data/auth_service.dart';
 import '../../../app/data/destinations_service.dart';
 import '../../explore/screens/destinations_explore_screen.dart';
 import '../../explore/screens/destination_detail_screen.dart';
@@ -22,6 +23,7 @@ class _HomeContentState extends State<HomeContent> {
   @override
   void initState() {
     super.initState();
+    _loadUserName();
     _initLocation().whenComplete(_loadPopularDestinations);
   }
 
@@ -44,6 +46,20 @@ class _HomeContentState extends State<HomeContent> {
       setState(() => _currentPosition = pos);
     } catch (e) {
       // Silently handle location errors
+    }
+  }
+
+  Future<void> _loadUserName() async {
+    try {
+      final name = await AuthService.instance.getCurrentUserFullName();
+      if (!mounted) return;
+      setState(() {
+        _fullName = name;
+        _loadingName = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _loadingName = false);
     }
   }
 
@@ -271,10 +287,15 @@ class _HomeContentState extends State<HomeContent> {
                               final rating = double.tryParse(destination['rating']?.toString() ?? '0') ?? 0.0;
                               final distanceText = _formatDistanceFor(destination);
                               
+                              final categoryName = ((destination['categories'] as Map?)?['name']
+                                        ?? destination['category']
+                                        ?? destination['type']
+                                        ?? 'Destinasi')
+                                    .toString();
                               return PlaceCard(
                                 title: destination['name'] ?? 'Destinasi',
                                 subtitle: destination['address'] ?? 'Alamat tidak tersedia',
-                                priceLabel: 'Gratis',
+                                priceLabel: categoryName,
                                 distanceLabel: distanceText,
                                 rating: rating,
                                 imageUrl: destination['image_url'] ?? 'https://picsum.photos/600/400',

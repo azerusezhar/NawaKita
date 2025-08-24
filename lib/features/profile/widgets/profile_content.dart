@@ -150,7 +150,7 @@ class _ProfileContentState extends State<ProfileContent> {
                     const SizedBox(height: 8),
                     ProfileMenuItem(
                       icon: Icons.store_outlined,
-                      title: 'Tambahkan UMKM Anda',
+                      title: 'Tambahkan Destinasi',
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
