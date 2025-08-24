@@ -41,6 +41,8 @@ dependencies:
   flutter_markdown: ^0.7.3+1
   google_maps_flutter: ^2.5.0
 
+  #test
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
