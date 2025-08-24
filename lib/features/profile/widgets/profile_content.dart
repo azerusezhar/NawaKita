@@ -5,6 +5,7 @@ import 'profile_menu_item.dart';
 import 'logout_button.dart';
 import '../screens/personal_info_screen.dart';
 import '../screens/change_password_screen.dart';
+import '../screens/add_destination_screen.dart';
 
 class ProfileContent extends StatefulWidget {
   const ProfileContent({super.key});
@@ -151,7 +152,11 @@ class _ProfileContentState extends State<ProfileContent> {
                       icon: Icons.store_outlined,
                       title: 'Tambahkan UMKM Anda',
                       onTap: () {
-                        // TODO: Navigate to add UMKM screen
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const AddDestinationScreen(),
+                          ),
+                        );
                       },
                     ),
                     const SizedBox(height: 8),
