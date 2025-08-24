@@ -12,7 +12,6 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController _messageController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
-  bool _isInputFocused = false;
   final String _baseUrl = 'https://malang-chat-backend-865303528514.asia-southeast2.run.app';
   bool _isLoading = false;
   final List<Map<String, dynamic>> _messages = [
@@ -68,7 +67,6 @@ class _ChatPageState extends State<ChatPage> {
     // Listen to focus changes
     _focusNode.addListener(() {
       setState(() {
-        _isInputFocused = _focusNode.hasFocus;
       });
     });
   }
