@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../../app/data/destinations_service.dart';
 import '../widgets/destination_detail_card.dart';
+import 'destination_detail_screen.dart';
 
 class DestinationsExploreScreen extends StatefulWidget {
   const DestinationsExploreScreen({super.key});
@@ -234,7 +235,13 @@ class _DestinationsExploreScreenState extends State<DestinationsExploreScreen> {
                               distance: distanceText,
                               category: categoryName,
                               onTap: () {
-                                // TODO: Navigate to destination detail
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => DestinationDetailScreen(
+                                      destination: destination,
+                                    ),
+                                  ),
+                                );
                               },
                               onFavorite: () {
                                 // TODO: Toggle favorite
