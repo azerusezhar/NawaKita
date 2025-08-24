@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -11,6 +13,8 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController _messageController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   bool _isInputFocused = false;
+  final String _baseUrl = 'https://malang-chat-backend-865303528514.asia-southeast2.run.app';
+  bool _isLoading = false;
   final List<Map<String, dynamic>> _messages = [
     {
       'text': 'Bagaimana cara mengurus KTP yang hilang?',
@@ -74,6 +78,12 @@ class _ChatPageState extends State<ChatPage> {
     _messageController.dispose();
     _focusNode.dispose();
     super.dispose();
+  }
+
+  String _nowHHmm() {
+    final now = DateTime.now();
+    final two = (int n) => n.toString().padLeft(2, '0');
+    return '${two(now.hour)}:${two(now.minute)}';
   }
 
   @override
@@ -386,6 +396,7 @@ class _ChatPageState extends State<ChatPage> {
                             child: TextField(
                               controller: _messageController,
                               focusNode: _focusNode,
+                              onChanged: (_) => setState(() {}),
                               decoration: const InputDecoration(
                                 hintText: 'Ketik pesan Anda...',
                                 hintStyle: TextStyle(
@@ -418,29 +429,92 @@ class _ChatPageState extends State<ChatPage> {
                       ),
                     ),
                   ),
-                  // Animated send button with size animation
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeInOut,
-                    width: _isInputFocused ? 64 : 0, // Width animation instead of slide
-                    margin: EdgeInsets.only(left: _isInputFocused ? 8 : 0),
-                    child: AnimatedOpacity(
-                      duration: const Duration(milliseconds: 200),
-                      opacity: _isInputFocused ? 1.0 : 0.0,
-                      child: _isInputFocused
-                          ? GestureDetector(
-                              onTap: () {
-                                // Handle send message
-                                if (_messageController.text.trim().isNotEmpty) {
-                                  setState(() {
-                                    _messages.add({
-                                      'text': _messageController.text.trim(),
-                                      'isBot': false,
-                                      'time': '14:35'
-                                    });
+                  // Always-visible send button, enabled only when text is present
+                  SizedBox(
+                    width: 64,
+                    child: Opacity(
+                      opacity: _messageController.text.trim().isNotEmpty && !_isLoading ? 1.0 : 0.5,
+                      child: GestureDetector(
+                              onTap: () async {
+                                final input = _messageController.text.trim();
+                                if (input.isEmpty || _isLoading) return;
+
+                                // Append user message
+                                setState(() {
+                                  _messages.add({
+                                    'text': input,
+                                    'isBot': false,
+                                    'time': _nowHHmm(),
                                   });
-                                  _messageController.clear();
-                                  _focusNode.unfocus(); // Unfocus after sending
+                                  _isLoading = true;
+                                });
+
+                                _messageController.clear();
+                                _focusNode.unfocus();
+
+                                // Add typing placeholder
+                                int botIndex = -1;
+                                setState(() {
+                                  _messages.add({
+                                    'text': 'Sedang mengetik...'
+                                        ,
+                                    'isBot': true,
+                                    'time': _nowHHmm(),
+                                  });
+                                  botIndex = _messages.length - 1;
+                                });
+
+                                // Build messages payload
+                                final payloadMessages = _messages.map((m) => {
+                                      'role': m['isBot'] == true
+                                          ? 'assistant'
+                                          : 'user',
+                                      'content': m['text'] as String,
+                                    }).toList();
+
+                                try {
+                                  final resp = await http.post(
+                                    Uri.parse('$_baseUrl/chat'),
+                                    headers: {
+                                      'Content-Type': 'application/json',
+                                    },
+                                    body: jsonEncode({
+                                      'messages': payloadMessages,
+                                      'city': 'Malang',
+                                    }),
+                                  );
+
+                                  if (resp.statusCode == 200) {
+                                    final data = jsonDecode(resp.body) as Map<String, dynamic>;
+                                    final answer = (data['answer'] ?? '').toString();
+                                    setState(() {
+                                      _messages[botIndex >= 0 ? botIndex : _messages.length - 1] = {
+                                        'text': answer.isEmpty ? 'Tidak ada jawaban.' : answer,
+                                        'isBot': true,
+                                        'time': _nowHHmm(),
+                                      };
+                                    });
+                                  } else {
+                                    setState(() {
+                                      _messages[botIndex >= 0 ? botIndex : _messages.length - 1] = {
+                                        'text': 'Gagal memproses (${resp.statusCode}).',
+                                        'isBot': true,
+                                        'time': _nowHHmm(),
+                                      };
+                                    });
+                                  }
+                                } catch (e) {
+                                  setState(() {
+                                    _messages[botIndex >= 0 ? botIndex : _messages.length - 1] = {
+                                      'text': 'Terjadi kesalahan jaringan: $e',
+                                      'isBot': true,
+                                      'time': _nowHHmm(),
+                                    };
+                                  });
+                                } finally {
+                                  setState(() {
+                                    _isLoading = false;
+                                  });
                                 }
                               },
                               child: CircleAvatar(
@@ -452,8 +526,7 @@ class _ChatPageState extends State<ChatPage> {
                                   size: 20,
                                 ),
                               ),
-                            )
-                          : const SizedBox.shrink(),
+                            ),
                     ),
                   ),
                 ],
